@@ -1,37 +1,65 @@
-# Web_Scraping Project
+# グローバル自動車データ分析ハブ (Global Automotive Data Hub)
 
-各自動車データソースのスクレイパー集。
+中国、日本、および北米市場の最新の新車販売ランキングの取得と、車両スペック（諸元）の横並び比較を簡単に行える Streamlit アプリケーションです。
 
-## 構造
+## 主な機能
 
+1. **多市場対応 (Multi-Market support)**
+   * **中国 (China)**: 懂车帝 (Dongchedi) API からリアルタイムで月次ランキングとスペックデータを取得します（EV/PHEV/REEVなどのエネルギータイプ別、SUV/セダンなどのボディ別絞り込みに対応）。
+   * **日本 (Japan)**: 日本自動車販売協会連合会 (JADA) の公表データに基づく販売ランキングと、国内主要モデル（ヤリス、カローラ、シエンタ、フリード、プリウス等）のスペック比較。
+   * **北米 (North America)**: GoodCarBadCar公表の全米新車販売台数ランキングと、米国主要モデル（F-150、Silverado、RAV4、Model Y等）のスペック比較。
+
+2. **インタラクティブ・フィルター (Instant Filtering)**
+   * **ブランド・車種での即時絞り込み**: 取得したデータからブランド名（マルチセレクト）やキーワード検索で、表の行を瞬時にフィルタリングできます。
+   * **表示列のカスタマイズ**: チェックボックスで、テーブルの表示項目（カラム）を自由に切り替えられます。
+   * **動的統計＆グラフ**: 絞り込んだ内容に応じて、合計販売台数などの統計指標や販売台数上位10モデルの棒グラフがリアルタイムに更新されます。
+
+3. **車両スペックの横並び比較 (Specs Comparison)**
+   * ランキング一覧の左端のチェックボックスで比較したい車両を選択（複数可）するだけで、画面下部にスペック詳細が横並びで表示されます。
+   * 手動で車両IDを指定して比較するツールも搭載（人気モデルのプリセットID付き）。
+   * 縦横の転置（車両を列にするか行にするか）をチェックボックス一つで切り替え可能です。
+
+4. **データのダウンロード (Export)**
+   * ランキング一覧、およびスペック比較結果は、ボタン一つで **CSV形式** または **Excel形式 (.xlsx)** でダウンロードできます。
+
+---
+
+## フォルダ構造
+
+```text
+web-scraping/
+├── app.py                         # アプリケーションのメインUI (Streamlit)
+├── requirements.txt               # パッケージ依存定義
+├── README.md                      # 本ドキュメント
+│
+├── scrapers/                      # 各市場のスクレイピング・データ処理パッケージ
+│   ├── manager.py                 # 市場（中国/日本/北米）の振り分け窓口モジュール
+│   ├── china/                     # 中国市場用 (懂车帝 API 接続、自動ページング、HTMLステート解析)
+│   │   ├── ranking_scraper.py
+│   │   ├── spec_scraper.py
+│   │   └── dongchedi_wrapper.py
+│   ├── japan/                     # 日本市場用 (JADAランキング ＆ 日本車スペックDB)
+│   │   └── jada_scraper.py
+│   └── usa/                       # 北米市場用 (USランキング ＆ 北米車スペックDB)
+│       └── usa_scraper.py
+│
+└── _archive/                      # 過去の開発用スクレイパーアーカイブ (本アプリからは参照しません)
+    ├── dongchedi/                 # 懂车帝用オリジナルスクレイパー
+    └── autohome/                  # 自動車之家用オリジナルスクレイパー (HDF5出力版)
 ```
-Web_Scraping/
-├── autohome/
-│   ├── production/
-│   │   ├── spec_scraper_multi_hdf.py  # メインスクレイパー（HDF5出力）
-│   │   └── read_hdf.py                # HDF5読み込みユーティリティ
-│   ├── archive/
-│   │   ├── spec_scraper.py            # 旧CSV版
-│   │   ├── spec_scraper_multi.py      # 旧マルチシリーズCSV版
-│   │   ├── spec_scraper_multi_test.py # テスト版
-│   │   ├── spec_scraper_multi_pkl.py  # 旧Pickle版
-│   │   └── read_pkl.py                # Pickle読み込みユーティリティ
-│   ├── trash/                         # 廃棄済みファイル
-│   └── all_series_car_specs.h5        # 出力データ（HDF5）
-└── dongchedi/
-    ├── production/
-    │   └── ranking_scraper.py         # 販売台数ランキングスクレイパー
-    └── car_sales_ranking.csv          # 出力データ
-```
 
-## 実行方法
+---
 
-各スクリプトはファイルの場所基準でパスを解決するため、どのディレクトリからでも実行可能。
+## 起動・使用方法
 
+### 必要なライブラリのインストール
 ```bash
-# autohome スペックデータ取得
-python autohome/production/spec_scraper_multi_hdf.py
-
-# dongchedi 販売ランキング取得
-python dongchedi/production/ranking_scraper.py
+pip install -r requirements.txt
 ```
+
+### アプリケーションの起動
+プロジェクトのルートディレクトリで以下のコマンドを実行します：
+```bash
+streamlit run app.py
+```
+起動後、ブラウザで [http://localhost:8501](http://localhost:8501) にアクセスして操作してください。
