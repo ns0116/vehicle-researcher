@@ -9,7 +9,7 @@ from scrapers.manager import get_market_rankings, get_market_specs
 
 # ページ基本設定
 st.set_page_config(
-    page_title="グローバル自動車データ分析ハブ",
+    page_title="Vehicle Researcher | 車両リサーチハブ",
     page_icon="🚗",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -80,8 +80,8 @@ st.markdown("""
 # アプリヘッダー
 st.markdown("""
 <div class="main-header">
-    <h1>🚗 グローバル自動車市場データ分析ハブ</h1>
-    <p>中国、日本、および北米主要市場の新車販売ランキングや車両諸元（スペック）をインタラクティブに比較します</p>
+    <h1>🚗 Vehicle Researcher</h1>
+    <p>グローバル自動車市場（中国・日本・北米）の新車販売ランキングや車両諸元（スペック）をインタラクティブに比較・分析します</p>
 </div>
 """, unsafe_allow_html=True)
 

@@ -1,4 +1,4 @@
-# グローバル自動車データ分析ハブ (Global Automotive Data Hub)
+# Vehicle Researcher (車両リサーチハブ)
 
 中国、日本、および北米市場の最新の新車販売ランキングの取得と、車両スペック（諸元）の横並び比較を簡単に行える Streamlit アプリケーションです。
 
