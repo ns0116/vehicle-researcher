@@ -6,8 +6,8 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-from dongchedi.production.ranking_scraper import get_ranking
-from dongchedi.production.spec_scraper import scrape_dongchedi_specs
+from _archive.dongchedi.production.ranking_scraper import get_ranking
+from _archive.dongchedi.production.spec_scraper import scrape_dongchedi_specs
 
 def get_china_rankings(month="", energy_type="", series_type="", count=100):
     """
