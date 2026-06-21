@@ -27,7 +27,7 @@
 ## フォルダ構造
 
 ```text
-web-scraping/
+vehicle-researcher/
 ├── app.py                         # アプリケーションのメインUI (Streamlit)
 ├── requirements.txt               # パッケージ依存定義
 ├── README.md                      # 本ドキュメント
