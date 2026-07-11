@@ -36,6 +36,10 @@ JADA_RANKINGS = {
 
 # General fallback for any other months (generate realistic JADA rankings)
 def get_fallback_rankings(month):
+    """
+    JADA_RANKINGS に存在しない月のフォールバック。
+    WARNING: 返されるデータは202605データを基にした推定値であり、JADA公式数値ではない。
+    """
     base = JADA_RANKINGS["202605"]
     data = []
     # Slightly vary sales counts based on month hash to make it look dynamic
@@ -136,17 +140,23 @@ JAPAN_CAR_SPECS = {
     }
 }
 
+def get_available_months():
+    """JADA_RANKINGS に実データが存在する月のリストを降順で返す。"""
+    return sorted(JADA_RANKINGS.keys(), reverse=True)
+
 def get_japan_rankings(month="", count=100):
     """
     Get JADA brand passenger car sales rankings.
+    Returns (DataFrame, is_estimated: bool). is_estimated=True の場合はデータが推定値。
     """
     if not month:
         month = "202605"
-        
+
     raw_list = JADA_RANKINGS.get(month)
-    if not raw_list:
+    is_estimated = raw_list is None
+    if is_estimated:
         raw_list = get_fallback_rankings(month)
-        
+
     # Standardize columns
     data = []
     for item in raw_list[:count]:
@@ -163,7 +173,7 @@ def get_japan_rankings(month="", count=100):
             "データ取得日": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
         
-    return pd.DataFrame(data)
+    return pd.DataFrame(data), is_estimated
 
 def get_japan_specs(car_ids):
     """

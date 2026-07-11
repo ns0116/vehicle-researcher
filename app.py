@@ -6,6 +6,7 @@ import os
 
 # スクレイパーマネージャーのインポート
 from scrapers.manager import get_market_rankings, get_market_specs
+from scrapers.japan.jada_scraper import get_available_months
 
 # ページ基本設定
 st.set_page_config(
@@ -129,9 +130,10 @@ if page == "販売台数ランキング":
             months.insert(0, "") # 最新のオプション
             selected_month = st.selectbox("対象年月 (YYYYMM)", months, index=1, help="過去の販売ランキングを取得する場合は年月を選択してください。")
         elif market == "日本":
-            selected_month = st.selectbox("対象年月 (YYYYMM)", ["202605", "202604"], index=0, help="JADA公表データを表示します。")
+            available_months = get_available_months()
+            selected_month = st.selectbox("対象年月 (YYYYMM)", available_months, index=0, help="JADA公表データを表示します。")
         else:
-            selected_month = st.selectbox("対象期間", ["2025 通年"], index=0)
+            selected_month = st.selectbox("対象期間", ["2025年 通年（静的データ）"], index=0)
             
     with col2:
         if market == "中国":
@@ -166,19 +168,20 @@ if page == "販売台数ランキング":
 
     if st.button("🔍 ランキングデータを取得"):
         with st.spinner(f"{market}のデータを取得中..."):
-            df = get_market_rankings(
+            df, is_estimated = get_market_rankings(
                 market=market,
                 month=selected_month,
                 energy_type=selected_energy,
                 series_type=selected_series,
                 count=int(limit)
             )
-            
+
             if df is not None and not df.empty:
                 # セッションステートへの保存時に市場タグを含めてキーに格納
                 st.session_state["sales_data"] = df
                 st.session_state["sales_market"] = market
                 st.session_state["selected_month_label"] = selected_month or "最新"
+                st.session_state["sales_is_estimated"] = is_estimated
                 st.success(f"成功: {len(df)} 件のモデル情報を取得しました！")
             else:
                 st.error("データの取得に失敗したか、データが存在しませんでした。条件を変更して再度お試しください。")
@@ -187,6 +190,8 @@ if page == "販売台数ランキング":
     if "sales_data" in st.session_state and st.session_state.get("sales_market") == market:
         df_raw = st.session_state["sales_data"]
         month_label = st.session_state.get("selected_month_label", "最新")
+        if st.session_state.get("sales_is_estimated"):
+            st.warning("⚠️ このデータは JADA 公式数値ではなく、推定値です。")
         
         # インタラクティブな絞り込みフィルターを表示
         st.subheader("🔍 表示フィルター (瞬時に絞り込み)")
@@ -240,7 +245,7 @@ if page == "販売台数ランキング":
             sales_series = pd.to_numeric(df_filtered["販売台数"], errors='coerce').dropna()
             st.metric("総販売台数 (表示分)", f"{int(sales_series.sum()):,} 台")
         with stat3:
-            top_brand = df_filtered["ブランド名"].value_counts().index[0] if not df_filtered["ブランド名"].empty else "N/A"
+            top_brand = df_filtered["ブランド名"].value_counts().index[0] if not df_filtered.empty else "N/A"
             st.metric("最多掲載ブランド", top_brand)
             
         # データテーブルの表示
@@ -354,10 +359,13 @@ if page == "販売台数ランキング":
                 
         # 棒グラフの表示
         st.subheader(f"📊 販売台数上位10モデルの比較 ({market})")
-        chart_df = df_filtered.copy()
-        chart_df["販売台数"] = pd.to_numeric(chart_df["販売台数"], errors='coerce')
-        top10 = chart_df.nlargest(10, "販売台数")
-        st.bar_chart(data=top10, x="車種名", y="販売台数", color="#0083b0")
+        if df_filtered.empty:
+            st.info("絞り込み結果が0件のため、グラフを表示できません。")
+        else:
+            chart_df = df_filtered.copy()
+            chart_df["販売台数"] = pd.to_numeric(chart_df["販売台数"], errors='coerce')
+            top10 = chart_df.nlargest(10, "販売台数")
+            st.bar_chart(data=top10, x="車種名", y="販売台数", color="#0083b0")
 
 else: # 車両諸元（スペック）比較
     st.header(f"⚙️ {market} 車両諸元（スペック）比較")
