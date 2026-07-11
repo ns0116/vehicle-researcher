@@ -31,7 +31,7 @@ def scrape_dongchedi_specs(car_ids):
     url = f"https://www.dongchedi.com/auto/params-carIds-{car_ids_str}"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
         "Referer": "https://www.dongchedi.com/",
     }
@@ -41,7 +41,7 @@ def scrape_dongchedi_specs(car_ids):
         response.raise_for_status()
         text = response.text
         
-        match = re.search(r'<script[^>]*>(\{"props":.*?\})</script>', text)
+        match = re.search(r'<script[^>]*>(\{"props":.*?\})</script>', text, re.DOTALL)
         if not match:
             print("Dongchedi Scraper: No props script tag found in HTML response.")
             return pd.DataFrame()

@@ -87,7 +87,7 @@ US_CAR_SPECS = {
 def get_usa_rankings(month="", count=100):
     """
     Get North America/US Auto Sales Rankings.
-    Tries to scrape GoodCarBadCar and falls back to preloaded 2025 dataset.
+    Returns preloaded 2025 static dataset. Live scraping is not implemented.
     """
     # Preloaded Fallback
     data = []

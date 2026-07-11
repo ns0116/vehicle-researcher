@@ -13,12 +13,12 @@ def fetch_car_sales_ranking_json(url, params=None):
     指定されたURLから自動車販売台数ランキングのJSONデータを取得する。
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
         "Referer": "https://www.dongchedi.com/sales",
     }
     try:
-        response = requests.get(url, params=params, headers=headers)
+        response = requests.get(url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -76,8 +76,9 @@ def get_ranking(month="", new_energy_type="", series_type="", count=5000):
     all_dfs = []
     offset = 0
     limit_per_request = 100
-    
-    while len(all_dfs) * limit_per_request < count:
+    MAX_PAGES = 50
+
+    while len(all_dfs) < MAX_PAGES:
         current_len = sum(len(df) for df in all_dfs)
         if current_len >= count:
             break
