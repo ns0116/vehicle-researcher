@@ -1,7 +1,11 @@
+from typing import Optional
+
 import pandas as pd
 from datetime import datetime
 
-# Local database for U.S. vehicle sales rankings (2025 full year data)
+from ..utils import pivot_spec_fields
+
+# Local database for U.S. vehicle sales rankings (2025 full year static data)
 US_2025_SALES = [
     {"rank": 1, "name": "F-Series", "brand": "Ford", "sales": 828832, "price": "$38,610 - $100,000", "car_id": 2001},
     {"rank": 2, "name": "Silverado", "brand": "Chevrolet", "sales": 588709, "price": "$36,800 - $72,000", "car_id": 2002},
@@ -62,6 +66,36 @@ US_CAR_SPECS = {
             "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "AWD"
         }
     },
+    2005: {
+        "series_name": "Ram 1500", "car_name": "Big Horn Crew Cab 5.7L HEMI",
+        "info": {
+            "official_price": "$47,885", "manufacturer": "Ram", "segment": "Full-Size Pickup Truck",
+            "energy_type": "Gasoline (ガソリン)", "engine": "5.7L V8 HEMI", "max_power": "395 hp",
+            "max_torque": "410 lb-ft (556 N·m)", "transmission": "8-Speed Automatic (TorqueFlite)", "dimensions": "232.9 x 82.1 x 78.3 in (5915 x 2086 x 1990 mm)",
+            "wheelbase": "144.5 in (3670 mm)", "weight": "5,373 lbs (2437 kg)", "fuel_economy": "17 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5-6 seats", "drive_type": "4WD"
+        }
+    },
+    2006: {
+        "series_name": "GMC Sierra 1500", "car_name": "SLE Crew Cab 5.3L V8",
+        "info": {
+            "official_price": "$43,095", "manufacturer": "GMC", "segment": "Full-Size Pickup Truck",
+            "energy_type": "Gasoline (ガソリン)", "engine": "5.3L EcoTec3 V8", "max_power": "355 hp",
+            "max_torque": "383 lb-ft (519 N·m)", "transmission": "10-Speed Automatic", "dimensions": "229.4 x 80.0 x 76.4 in (5827 x 2032 x 1940 mm)",
+            "wheelbase": "147.4 in (3744 mm)", "weight": "4,922 lbs (2233 kg)", "fuel_economy": "18 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5-6 seats", "drive_type": "4WD"
+        }
+    },
+    2007: {
+        "series_name": "Chevrolet Equinox", "car_name": "LT 1.5T FWD",
+        "info": {
+            "official_price": "$30,400", "manufacturer": "Chevrolet", "segment": "Compact SUV",
+            "energy_type": "Gasoline Turbo (ガソリン ターボ)", "engine": "1.5L 4-Cylinder Turbo", "max_power": "175 hp",
+            "max_torque": "203 lb-ft (275 N·m)", "transmission": "6-Speed Automatic", "dimensions": "183.1 x 72.6 x 65.4 in (4651 x 1844 x 1661 mm)",
+            "wheelbase": "107.3 in (2725 mm)", "weight": "3,572 lbs (1620 kg)", "fuel_economy": "29 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "FWD"
+        }
+    },
     2008: {
         "series_name": "Toyota Camry", "car_name": "LE Hybrid",
         "info": {
@@ -81,15 +115,93 @@ US_CAR_SPECS = {
             "wheelbase": "113.8 in (2891 mm)", "weight": "4,416 lbs (2003 kg)", "fuel_economy": "122 MPGe (EPA)",
             "warranty": "4 years / 50,000 miles", "seating": "5-7 seats", "drive_type": "AWD"
         }
+    },
+    2010: {
+        "series_name": "Toyota Tacoma", "car_name": "TRD Sport Double Cab 3.5L V6",
+        "info": {
+            "official_price": "$41,740", "manufacturer": "Toyota", "segment": "Mid-Size Pickup Truck",
+            "energy_type": "Gasoline (ガソリン)", "engine": "3.5L V6 (2GR-FKS)", "max_power": "278 hp",
+            "max_torque": "265 lb-ft (359 N·m)", "transmission": "6-Speed Automatic", "dimensions": "212.3 x 74.4 x 71.5 in (5393 x 1889 x 1816 mm)",
+            "wheelbase": "127.4 in (3236 mm)", "weight": "4,110 lbs (1864 kg)", "fuel_economy": "20 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "4WD"
+        }
+    },
+    2011: {
+        "series_name": "Honda Civic", "car_name": "Sport Sedan",
+        "info": {
+            "official_price": "$26,300", "manufacturer": "Honda", "segment": "Compact Sedan",
+            "energy_type": "Gasoline (ガソリン)", "engine": "2.0L 4-Cylinder (i-VTEC)", "max_power": "158 hp",
+            "max_torque": "138 lb-ft (187 N·m)", "transmission": "CVT", "dimensions": "182.7 x 70.9 x 55.7 in (4641 x 1801 x 1415 mm)",
+            "wheelbase": "107.7 in (2736 mm)", "weight": "2,896 lbs (1314 kg)", "fuel_economy": "33 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "FWD"
+        }
+    },
+    2012: {
+        "series_name": "Toyota Corolla", "car_name": "LE Hybrid",
+        "info": {
+            "official_price": "$23,550", "manufacturer": "Toyota", "segment": "Compact Sedan",
+            "energy_type": "Hybrid (HEV)", "engine": "1.8L 4-Cylinder + Motor", "max_power": "134 hp (Combined)",
+            "max_torque": "104 lb-ft (141 N·m)", "transmission": "ECVT", "dimensions": "182.7 x 70.1 x 56.5 in (4640 x 1780 x 1435 mm)",
+            "wheelbase": "103.9 in (2640 mm)", "weight": "3,054 lbs (1385 kg)", "fuel_economy": "53 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "FWD"
+        }
+    },
+    2013: {
+        "series_name": "Ford Explorer", "car_name": "ST-Line 2.3L EcoBoost AWD",
+        "info": {
+            "official_price": "$42,990", "manufacturer": "Ford", "segment": "Mid-Size SUV",
+            "energy_type": "Gasoline Turbo (ガソリン ターボ)", "engine": "2.3L 4-Cylinder EcoBoost Turbo", "max_power": "300 hp",
+            "max_torque": "310 lb-ft (420 N·m)", "transmission": "10-Speed Automatic", "dimensions": "198.8 x 78.9 x 70.0 in (5050 x 2004 x 1778 mm)",
+            "wheelbase": "112.6 in (2860 mm)", "weight": "4,345 lbs (1971 kg)", "fuel_economy": "22 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "6-7 seats", "drive_type": "AWD"
+        }
+    },
+    2014: {
+        "series_name": "Jeep Grand Cherokee", "car_name": "Laredo 3.6L V6",
+        "info": {
+            "official_price": "$39,490", "manufacturer": "Jeep", "segment": "Mid-Size SUV",
+            "energy_type": "Gasoline (ガソリン)", "engine": "3.6L V6 Pentastar", "max_power": "293 hp",
+            "max_torque": "260 lb-ft (353 N·m)", "transmission": "8-Speed Automatic", "dimensions": "189.8 x 76.5 x 69.3 in (4821 x 1943 x 1760 mm)",
+            "wheelbase": "114.8 in (2915 mm)", "weight": "4,513 lbs (2047 kg)", "fuel_economy": "19 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "4WD"
+        }
+    },
+    2015: {
+        "series_name": "Chevrolet Tahoe", "car_name": "LT 5.3L V8",
+        "info": {
+            "official_price": "$60,895", "manufacturer": "Chevrolet", "segment": "Full-Size SUV",
+            "energy_type": "Gasoline (ガソリン)", "engine": "5.3L EcoTec3 V8", "max_power": "355 hp",
+            "max_torque": "383 lb-ft (519 N·m)", "transmission": "10-Speed Automatic", "dimensions": "210.0 x 80.5 x 74.4 in (5334 x 2045 x 1890 mm)",
+            "wheelbase": "116.0 in (2947 mm)", "weight": "5,556 lbs (2520 kg)", "fuel_economy": "16 mpg (Combined)",
+            "warranty": "3 years / 36,000 miles", "seating": "9 seats", "drive_type": "4WD"
+        }
     }
 }
 
-def get_usa_rankings(month="", count=100):
+SPEC_FIELDS: list[tuple[str, str, str]] = [
+    ("基本情報", "official_price", "車両本体価格"),
+    ("基本情報", "manufacturer", "メーカー"),
+    ("基本情報", "segment", "セグメント"),
+    ("基本情報", "energy_type", "エネルギータイプ"),
+    ("基本情報", "engine", "エンジン仕様"),
+    ("性能", "max_power", "最高出力 (Horsepower)"),
+    ("性能", "max_torque", "最大トルク (Torque)"),
+    ("性能", "transmission", "変速機"),
+    ("寸法・重量", "dimensions", "全長x全幅x全高 (in / mm)"),
+    ("寸法・重量", "wheelbase", "ホイールベース (in / mm)"),
+    ("寸法・重量", "weight", "車両重量 (lbs / kg)"),
+    ("性能", "fuel_economy", "燃費消費率 (EPA / mpg)"),
+    ("基本情報", "seating", "乗車定員"),
+    ("基本情報", "drive_type", "駆動方式"),
+    ("基本情報", "warranty", "保証期間"),
+]
+
+
+def get_usa_rankings(month: str = "", count: int = 100) -> pd.DataFrame:
     """
     Get North America/US Auto Sales Rankings.
     Returns preloaded 2025 static dataset. Live scraping is not implemented.
     """
-    # Preloaded Fallback
     data = []
     for item in US_2025_SALES[:count]:
         data.append({
@@ -104,25 +216,23 @@ def get_usa_rankings(month="", count=100):
             "オフライン販売車種IDリスト": [],
             "データ取得日": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
-        
+
     return pd.DataFrame(data)
 
-def get_usa_specs(car_ids):
-    """
-    Returns pivoted specifications dataframe for USA cars.
-    """
+
+def get_usa_specs(car_ids: list[int]) -> pd.DataFrame:
+    """Returns pivoted specifications dataframe for USA cars."""
     if not car_ids:
         return pd.DataFrame()
-        
+
     matched_cars = []
     for cid in car_ids:
         cid_int = int(cid)
         if cid_int in US_CAR_SPECS:
             matched_cars.append((cid_int, US_CAR_SPECS[cid_int]))
         else:
-            # Generate generic mock spec for unmapped US car ID
             matched_cars.append((cid_int, {
-                "series_name": f"US Vehicle", "car_name": f"Base Model (ID {cid_int})",
+                "series_name": "US Vehicle", "car_name": f"Base Model (ID {cid_int})",
                 "info": {
                     "official_price": "$30,000", "manufacturer": "US Manufacturer", "segment": "Passenger Vehicle",
                     "energy_type": "Gasoline", "engine": "2.0L 4-Cylinder", "max_power": "180 hp",
@@ -131,37 +241,5 @@ def get_usa_specs(car_ids):
                     "warranty": "3 years / 36,000 miles", "seating": "5 seats", "drive_type": "FWD"
                 }
             }))
-            
-    # Pivot specs into standard schema
-    spec_fields = [
-        ("基本情報", "official_price", "車両本体価格"),
-        ("基本情報", "manufacturer", "メーカー"),
-        ("基本情報", "segment", "セグメント"),
-        ("基本情報", "energy_type", "エネルギータイプ"),
-        ("基本情報", "engine", "エンジン仕様"),
-        ("性能", "max_power", "最高出力 (Horsepower)"),
-        ("性能", "max_torque", "最大トルク (Torque)"),
-        ("性能", "transmission", "変速機"),
-        ("寸法・重量", "dimensions", "全長x全幅x全高 (in / mm)"),
-        ("寸法・重量", "wheelbase", "ホイールベース (in / mm)"),
-        ("寸法・重量", "weight", "車両重量 (lbs / kg)"),
-        ("性能", "fuel_economy", "燃費消費率 (EPA / mpg)"),
-        ("基本情報", "seating", "乗車定員"),
-        ("基本情報", "drive_type", "駆動方式"),
-        ("基本情報", "warranty", "保証期間")
-    ]
-    
-    rows = []
-    for category, key, label in spec_fields:
-        row_dict = {
-            "カテゴリ": category,
-            "項目": label
-        }
-        
-        for cid, car in matched_cars:
-            car_label = f"{car['series_name']} ({car['car_name']})"
-            row_dict[car_label] = car["info"].get(key, "-")
-            
-        rows.append(row_dict)
-        
-    return pd.DataFrame(rows)
+
+    return pivot_spec_fields(SPEC_FIELDS, matched_cars)
