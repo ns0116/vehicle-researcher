@@ -1,5 +1,5 @@
 requests==2.32.3
 pandas==2.2.3
-tables==3.10.2
-streamlit
-xlsxwriter
+streamlit>=1.35.0
+xlsxwriter>=3.1.0
+pytest>=8.0.0
