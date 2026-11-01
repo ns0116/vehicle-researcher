@@ -97,7 +97,7 @@ def _cached_specs(market: str, car_ids: tuple):
 st.markdown("""
 <div class="main-header">
     <h1>🚗 Vehicle Researcher</h1>
-    <p>グローバル自動車市場（中国・日本・北米）の新車販売ランキングや車両諸元（スペック）をインタラクティブに比較・分析します</p>
+    <p>中国・日本・北米の新車販売ランキングや車両諸元（スペック）を横断して比較・分析します</p>
 </div>
 """, unsafe_allow_html=True)
 
