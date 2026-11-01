@@ -393,7 +393,7 @@ else: # 車両諸元（スペック）比較
 
     st.markdown(f"""
     選択された市場（{market}）の車両詳細スペックを取得し、横並びで比較します。
-    車両ID（コンマ区切りで複数指定可能）を直接入力して実行してください。
+    車両ID（カンマ区切りで複数指定可能）を直接入力して実行してください。
     """)
 
     # プリセット表示（市場ごと）
@@ -429,7 +429,7 @@ else: # 車両諸元（スペック）比較
         </div>
         """, unsafe_allow_html=True)
         default_ids = "1001, 1002, 1014"
-        input_help = "プリセットにある代表車両IDをコンマ区切りで入力してください"
+        input_help = "プリセットにある代表車両IDをカンマ区切りで入力してください"
     else:
         st.markdown("""
         <div class="card-container">
@@ -445,10 +445,10 @@ else: # 車両諸元（スペック）比較
         </div>
         """, unsafe_allow_html=True)
         default_ids = "2001, 2003, 2009"
-        input_help = "北米プリセットにある代表車両IDをコンマ区切りで入力してください"
+        input_help = "北米プリセットにある代表車両IDをカンマ区切りで入力してください"
 
     # 車両ID入力
-    car_input = st.text_input("車両IDを入力 (複数指定する場合はコンマで区切る)", default_ids, help=input_help)
+    car_input = st.text_input("車両IDを入力 (複数指定する場合はカンマで区切る)", default_ids, help=input_help)
 
     transpose_opt = st.checkbox("表を転置する（車種を列にする）", value=True, help="表を転置すると、複数の車両スペックを横並びで比較しやすくなります。")
 
@@ -460,7 +460,7 @@ else: # 車両諸元（スペック）比較
             if not car_ids:
                 st.error("有効な数値車両IDを1つ以上入力してください。")
             else:
-                with st.spinner(f"{len(car_ids)} 台のスペックを{market}データから取得中..."):
+                with st.spinner(f"{len(car_ids)} 台のスペックを {market} のデータから取得中..."):
                     df = _cached_specs(market, tuple(car_ids))
 
                     if df is not None and not df.empty:
