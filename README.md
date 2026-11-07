@@ -1,5 +1,9 @@
 # Vehicle Researcher (車両リサーチハブ)
 
+> **保守は終了しました（2026-11-07）**: このリポジトリは更新しません。コードは参照用に残しています。
+>
+> **No longer maintained (2026-11-07)**: This repository will not be updated. The code is kept for reference.
+
 中国、日本、北米市場の最新新車販売ランキングを取得し、車両スペック（諸元）を横並びで比較できる Streamlit アプリケーションです。
 
 ## 主な機能
